@@ -1,10 +1,14 @@
-package com.pnf.OAT;
+package com.pnf.OATPlugin;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pnf.OAT.DexFile;
+import com.pnf.OAT.OATFile;
 import com.pnfsoftware.jeb.core.actions.InformationForActionExecution;
+import com.pnfsoftware.jeb.core.output.AbstractUnitRepresentation;
+import com.pnfsoftware.jeb.core.output.IInfiniDocument;
 import com.pnfsoftware.jeb.core.output.IUnitFormatter;
 import com.pnfsoftware.jeb.core.output.UnitFormatterAdapter;
 import com.pnfsoftware.jeb.core.properties.IPropertyDefinitionManager;
@@ -40,13 +44,51 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
         return true;
     }
 
+
+    @Override
+    public String getDescription() {
+        return super.getDescription() + getNotes();
+    }
+    @Override
+    public String getNotes() {
+        String output = "- Notes:\n";
+        output += "  - " + "OAT Version: " + oat.getVersion() + "\n";
+        output += "  - " + "Dex File Count: " + oat.getDexFileCount() + "\n";
+
+        output += "  - " + "Dex File Paths:\n";
+        for(DexFile dex : oat.getDexFiles()) {
+            output += "    - " + dex.getLocation() + "\n";
+        }
+
+        output += "  - " + "Key Value Store:\n";
+        String[] keyValueStore = oat.getKeyValueStore().split("\0");
+        String key;
+        String value;
+        for(int index=0; index < keyValueStore.length / 2; index++) {
+            key = keyValueStore[index * 2];
+            value = keyValueStore[index * 2 + 1];
+            output += "    - " + key + " : " + value + "\n";
+        }
+
+
+        return output;
+    }
+
     @Override
     public IBinaryFrames serialize() {
         return null;
     }
     @Override
     public IUnitFormatter getFormatter() {
-        return new UnitFormatterAdapter();
+        UnitFormatterAdapter formatter = new UnitFormatterAdapter();
+
+        formatter.addDocumentPresentation(new AbstractUnitRepresentation("Key Value Store", false) {
+            @Override
+            public IInfiniDocument getDocument() {
+                return new KeyValueStoreDocument(oat);
+            }
+        });
+        return formatter;
     }
 
     @Override

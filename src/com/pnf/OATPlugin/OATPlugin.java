@@ -1,9 +1,7 @@
-package com.pnf.OAT;
+package com.pnf.OATPlugin;
 
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.pnfsoftware.jeb.core.PluginInformation;
 import com.pnfsoftware.jeb.core.properties.IPropertyDefinitionManager;
@@ -21,9 +19,8 @@ import com.pnfsoftware.jeb.util.logging.ILogger;
 public class OATPlugin extends AbstractUnitIdentifier {
     private static final ILogger logger = GlobalLog.getLogger(OATPlugin.class);
     static {
-        System.out.println("OATPlugin Loaded");
+        logger.info("OATPlugin Loaded");
     }
-
 
     public OATPlugin() {
         super("OAT_file", 0);

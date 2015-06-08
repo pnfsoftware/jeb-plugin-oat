@@ -99,7 +99,6 @@ public class OATFile extends StreamReader {
             imageFileLocationOatDataBegin = readInt(stream);
             keyValueStoreSize = readInt(stream);
             keyValueStore = new byte[keyValueStoreSize];
-            logger.info("%d dex files", dexFileCount);
             for(int index=0; index < keyValueStoreSize; index++) {
                 stream.read(keyValueStore, index, 1);
             }
@@ -120,8 +119,7 @@ public class OATFile extends StreamReader {
                 dexFileLocation = readString(stream, dexFileLocationSize);
                 dexFileLocaionChecksum = readInt(stream);
                 dexFilePointer = readInt(stream);
-
-                dexFiles.add(new DexFile(data, dexFilePointer, data.length - dexFilePointer));
+                dexFiles.add(new DexFile(data, dexFilePointer, data.length - dexFilePointer, dexFileLocation));
 
             }
         }
@@ -136,9 +134,32 @@ public class OATFile extends StreamReader {
         return dexFileCount;
     }
 
-
-
     public List<DexFile> getDexFiles() {
         return dexFiles;
     }
+
+    public String getISAString() {
+        switch(instructionSet) {
+            case OAT.kArm:
+                return "kArm";
+            case OAT.kArm64:
+                return "kArm64";
+            case OAT.kThumb2:
+                return "kThumb2";
+            case OAT.kX86:
+                return "kX86";
+            case OAT.X86_64:
+                return "X86_64";
+            case OAT.kMips:
+                return "kMips";
+            case OAT.kMips64:
+                return "kMips64";
+            default:
+                return "kNone";
+        }
+    }
+    public String getKeyValueStore() {
+        return new String(keyValueStore);
+    }
+
 }

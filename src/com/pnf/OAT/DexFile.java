@@ -6,10 +6,12 @@ public class DexFile extends StreamReader {
     private byte[] data;
     private int offset;
     private int size;
-    public DexFile(byte[] data, int offset, int size) {
+    private String location;
+    public DexFile(byte[] data, int offset, int size, String location) {
         this.data = data;
         this.offset = offset;
         this.size = size;
+        this.location = location;
     }
 
 
@@ -17,6 +19,10 @@ public class DexFile extends StreamReader {
         byte[] output = new byte[size];
         System.arraycopy(data, offset, output, 0, size);
         return output;
+    }
+
+    public String getLocation() {
+        return location;
     }
 
 }
