@@ -12,10 +12,11 @@ import com.pnfsoftware.jeb.core.output.table.impl.TableRow;
 
 public class KeyValueStoreDocument extends JebEventSource implements ITableDocument {
 
+    // View of the keyvalue store in the OAT's header
+
     List<TableRow> rows;
 
     OATFile oat;
-
 
     public KeyValueStoreDocument(OATFile oat) {
         this.oat = oat;
@@ -29,6 +30,7 @@ public class KeyValueStoreDocument extends JebEventSource implements ITableDocum
             cells = new ArrayList<>();
             key = keyValueStore[index * 2];
             value = keyValueStore[index * 2 + 1];
+            // Create column for key and column for value
             cells.add(new Cell(key));
             cells.add(new Cell(value));
             rows.add(new TableRow(cells));
@@ -50,6 +52,7 @@ public class KeyValueStoreDocument extends JebEventSource implements ITableDocum
 
     @Override
     public ITableDocumentPart getTable() {
+        // Get all rows
         return getTablePart(0, rows.size());
     }
 

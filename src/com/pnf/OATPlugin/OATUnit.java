@@ -1,6 +1,5 @@
 package com.pnf.OATPlugin;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +50,7 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     }
     @Override
     public String getNotes() {
+        // Put together info about the opened OAT file
         String output = "- Notes:\n";
         output += "  - " + "OAT Version: " + oat.getVersion() + "\n";
         output += "  - " + "Dex File Count: " + oat.getDexFileCount() + "\n";
@@ -59,7 +59,6 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
         for(DexFile dex : oat.getDexFiles()) {
             output += "    - " + dex.getLocation() + "\n";
         }
-
         output += "  - " + "Key Value Store:\n";
         String[] keyValueStore = oat.getKeyValueStore().split("\0");
         String key;
@@ -69,19 +68,21 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
             value = keyValueStore[index * 2 + 1];
             output += "    - " + key + " : " + value + "\n";
         }
-
-
         return output;
     }
 
+
+    // No support for saving
     @Override
     public IBinaryFrames serialize() {
         return null;
     }
+
     @Override
     public IUnitFormatter getFormatter() {
         UnitFormatterAdapter formatter = new UnitFormatterAdapter();
 
+        // Add key value store view
         formatter.addDocumentPresentation(new AbstractUnitRepresentation("Key Value Store", false) {
             @Override
             public IInfiniDocument getDocument() {
@@ -91,6 +92,7 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
         return formatter;
     }
 
+    // Currently actions are not supported, ignore all.
     @Override
     public boolean executeAction(InformationForActionExecution info) {
         return false;
@@ -104,25 +106,6 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     @Override
     public List<Integer> getItemActions(long id) {
         return new ArrayList<>();
-    }
-
-    public String readStringFromBytes(byte[] data, int offset) {
-        String output = "";
-        int index=0;
-        while(offset + index < data.length) {
-            if(data[offset + index] == 0) {
-                break;
-            }
-            output = output + (char)data[offset + index];
-            index++;
-        }
-        return output;
-    }
-    private int readLInt(byte[] data, int offset) {
-        return ByteBuffer.wrap(new byte[]{data[offset+3], data[offset+2], data[offset+1], data[offset]}).getInt();
-    } 
-    private short readLShort(byte[] data, int offset) {
-        return ByteBuffer.wrap(new byte[]{data[offset+1], data[offset]}).getShort();
     }
 }
 

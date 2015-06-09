@@ -9,8 +9,11 @@ import com.pnfsoftware.jeb.util.logging.ILogger;
 
 
 public class StreamReader {
-
+    // Give a logger to all subclasses
     protected static final ILogger logger = GlobalLog.getLogger(StreamReader.class);
+
+    // Read an int from the stream at an offset from the current position
+    // Leaves a mark
     protected static int readInt(ByteArrayInputStream stream, int offset) {
         stream.mark(0);
         stream.skip(offset);
@@ -18,36 +21,47 @@ public class StreamReader {
         stream.reset();
         return output;
     }
-    protected static int readShort(ByteArrayInputStream stream, int offset) {
+
+    // Read an short from the stream at an offset from the current position
+    // Leaves a mark
+    protected static short readShort(ByteArrayInputStream stream, int offset) {
         stream.mark(0);
         stream.skip(offset);
         short output = readShort(stream);
         stream.reset();
         return output;
     }
+
+    // Read an int from the stream
+    // No mark
     protected static int readInt(ByteArrayInputStream stream) {
         byte[] temp = new byte[4];
         stream.read(temp, 0, 4);
         return ByteBuffer.wrap(temp).order(ByteOrder.LITTLE_ENDIAN).getInt();
     }
+
+    // Read an short from the stream
+    // No mark
     protected static short readShort(ByteArrayInputStream stream) {
         byte[] temp = new byte[2];
         stream.read(temp, 0, 2);
         return ByteBuffer.wrap(temp).order(ByteOrder.LITTLE_ENDIAN).getShort();
     }
+
+    // Read a string from the stream. Goes until sees null character '\0'
     protected static String readString(ByteArrayInputStream stream) {
         String output = "";
         char character;
         while(stream.available() > 0) {
             character = (char)stream.read();
-
             if(character == 0) 
                 break;
             output = output + character;
-            
         }
         return output;
     }
+
+    // Reads a string of given length, ignoring null char
     protected static String readString(ByteArrayInputStream stream, int length) {
         String output = "";
         char character;
@@ -58,23 +72,7 @@ public class StreamReader {
         return output;
     }
 
-    protected static String getStringFromTable(ByteArrayInputStream stream, int offset) {
-        String output = "";
-        stream.mark(0);
-        stream.skip(offset);
-        char character;
-        while(stream.available() > 0) {
-            character = (char)stream.read();
-
-            if(character == 0) 
-                break;
-            output = output + character;
-            
-        }
-        stream.reset();
-        return output;
-    }
-
+    // Extra implementation of checkbytes. Does byte by byte comparison
     protected static boolean checkBytes(byte[] data, int offset, byte... checkBytes) {
         for(int index=0; index < checkBytes.length; index++) {
             if(data[offset+index] != checkBytes[index])
