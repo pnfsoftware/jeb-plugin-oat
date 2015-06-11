@@ -40,6 +40,7 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
         for(DexFile dex : oat.getDexFiles()) {
             children.add(unitProcessor.process("test" + dex, dex.getBytes(), this));
         }
+        processed = true;
         return true;
     }
 
@@ -107,5 +108,24 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     public List<Integer> getItemActions(long id) {
         return new ArrayList<>();
     }
+
+    @Override
+    public long getItemAtAddress(String address) {
+        
+        return 1L;
+    }
+    @Override
+    public String getAddressOfItem(long id) {
+        return null;
+    }
+    @Override
+    public List<Integer> getGlobalActions() {
+        return new ArrayList<>();
+    }
+    @Override
+    public List<Integer> getAddressActions(String address) {
+        return new ArrayList<>();
+    }
+
 }
 
