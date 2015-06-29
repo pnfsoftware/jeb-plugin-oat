@@ -2,6 +2,7 @@ package com.pnf.OATPlugin;
 
 
 import com.pnfsoftware.jeb.core.PluginInformation;
+import com.pnfsoftware.jeb.core.input.IInput;
 import com.pnfsoftware.jeb.core.properties.IPropertyDefinitionManager;
 import com.pnfsoftware.jeb.core.properties.IPropertyManager;
 import com.pnfsoftware.jeb.core.units.AbstractUnitIdentifier;
@@ -33,12 +34,12 @@ public class OATPlugin extends AbstractUnitIdentifier {
     
 
     @Override
-    public boolean identify(byte[] data, IUnit parent) {
-        return checkBytes(data, 0, (byte)'o', (byte)'a', (byte)'t', (byte)'\n');
+    public boolean canIdentify(IInput input, IUnit parent) {
+        return checkBytes(input, 0, (byte)'o', (byte)'a', (byte)'t', (byte)'\n');
     }
     @Override
-    public IUnit prepare(String name, byte[] data, IUnitProcessor unitProcessor, IUnit parent) {
-        OATUnit unit = new OATUnit(name, data, unitProcessor, parent, pdm);
+    public IUnit prepare(String name, IInput input, IUnitProcessor unitProcessor, IUnit parent) {
+        OATUnit unit = new OATUnit(name, input, unitProcessor, parent, pdm);
         unit.process();
         return unit;
     }
