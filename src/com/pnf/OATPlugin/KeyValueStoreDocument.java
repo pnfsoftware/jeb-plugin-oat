@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.pnf.OAT.OATFile;
 import com.pnfsoftware.jeb.core.events.JebEventSource;
+import com.pnfsoftware.jeb.core.output.table.ICellCoordinates;
 import com.pnfsoftware.jeb.core.output.table.ITableDocument;
 import com.pnfsoftware.jeb.core.output.table.ITableDocumentPart;
 import com.pnfsoftware.jeb.core.output.table.impl.Cell;
@@ -59,6 +60,22 @@ public class KeyValueStoreDocument extends JebEventSource implements ITableDocum
     @Override
     public ITableDocumentPart getTablePart(int start, int count) {
         return new KeyValueStoreDocumentPart(start, rows.subList(start, start+count));
+    }
+
+
+    @Override
+    public ICellCoordinates addressToCoordinates(String address) {
+        return null;
+    }
+
+    @Override
+    public String coordinatesToAddress(ICellCoordinates coordinates) {
+        return null;
+    }
+
+    @Override
+    public void dispose() {
+        
     }
 
 }

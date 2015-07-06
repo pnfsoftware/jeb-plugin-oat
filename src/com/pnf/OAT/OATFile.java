@@ -136,7 +136,7 @@ public class OATFile extends StreamReader {
                 dexFiles.add(new DexFile(data, dexFilePointer, data.length - dexFilePointer, dexFileLocation));
 
                 // Calculate the location of the information about number of classes in the dex file
-                // I don't believe that this can be obfuscated successfully, but it is a point of 
+                // I don't believe that this can be obfuscated successfully, but it is a point of
                 // failure if it can be changed
                 current = data.length - stream.available();
                 classes_offsets_size = readInt(stream, dexFilePointer - current + 96);
