@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.pnf.OAT.DexFile;
 import com.pnf.OAT.OATFile;
@@ -11,6 +12,7 @@ import com.pnfsoftware.jeb.core.actions.ActionContext;
 import com.pnfsoftware.jeb.core.actions.IActionData;
 import com.pnfsoftware.jeb.core.input.BytesInput;
 import com.pnfsoftware.jeb.core.input.IInput;
+import com.pnfsoftware.jeb.core.input.IInputLocationInformation;
 import com.pnfsoftware.jeb.core.output.AbstractUnitRepresentation;
 import com.pnfsoftware.jeb.core.output.IGenericDocument;
 import com.pnfsoftware.jeb.core.output.IUnitFormatter;
@@ -34,7 +36,7 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     private byte[] data;
 
     public OATUnit(String name, IInput input, IUnitProcessor unitProcessor, IUnit parent, IPropertyDefinitionManager pdm) {
-        super("", input, "OAT_file", name, unitProcessor, parent, pdm);
+        super("", input, "OAT", name, unitProcessor, parent, pdm);
         try(InputStream stream = input.getStream()) {
             data = IO.readInputStream(stream);
         }
@@ -44,21 +46,28 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
 
     }
     public OATUnit(IBinaryFrames serializedData, IUnitProcessor unitProcessor, IUnit parent, IPropertyDefinitionManager pdm) {
-        super(serializedData, unitProcessor, parent, pdm);
+        //super(serializedData, unitProcessor, parent, pdm);
     }
 
     @Override
     public boolean process() {
         oat = new OATFile(data);
 
+        int index = 1;
         for(DexFile dex : oat.getDexFiles()) {
-            children.add(unitProcessor.process("test" + dex, new BytesInput(dex.getBytes()), this));
+            children.add(unitProcessor.process(dex.getLocation(), new BytesInput(dex.getBytes()), this));
+            index++;
         }
         processed = true;
         return true;
     }
 
 
+    @Override
+    public String getStatus() {
+        logger.info("Getting status");
+        return processed ? "Processed" : "Not Processed";
+    }
     @Override
     public String getDescription() {
         return super.getDescription() + getNotes();
@@ -73,15 +82,6 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
         output += "  - " + "Dex File Paths:\n";
         for(DexFile dex : oat.getDexFiles()) {
             output += "    - " + dex.getLocation() + "\n";
-        }
-        output += "  - " + "Key Value Store:\n";
-        String[] keyValueStore = oat.getKeyValueStore().split("\0");
-        String key;
-        String value;
-        for(int index=0; index < keyValueStore.length / 2; index++) {
-            key = keyValueStore[index * 2];
-            value = keyValueStore[index * 2 + 1];
-            output += "    - " + key + " : " + value + "\n";
         }
         return output;
     }
@@ -145,5 +145,28 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
         return new ArrayList<>();
     }
 
+    @Override
+    public String getComment(String address) {
+        return null;
+    }
+    @Override
+    public Map<String, String> getComments() {
+        return null;
+    }
+    @Override
+    public String getAddressLabel(String address) {
+        return null;
+    }
+    @Override
+    public Map<String, String> getAddressLabels() {
+        return null;
+    }
+    @Override
+    public String locationToAddress(IInputLocationInformation location) {
+        return null;
+    }
+    @Override
+    public IInputLocationInformation addressToLocation(String address) {
+        return null;
+    }
 }
-

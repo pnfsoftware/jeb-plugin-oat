@@ -19,7 +19,7 @@ public class OATPlugin extends AbstractUnitIdentifier {
     private static final ILogger logger = GlobalLog.getLogger(OATPlugin.class);
 
     public OATPlugin() {
-        super("OAT_file", 0);
+        super("OAT", 0);
     }
 
     @Override
@@ -35,20 +35,16 @@ public class OATPlugin extends AbstractUnitIdentifier {
 
     @Override
     public boolean canIdentify(IInput input, IUnit parent) {
+        logger.info("Identifying");
         return checkBytes(input, 0, (byte)'o', (byte)'a', (byte)'t', (byte)'\n');
     }
     @Override
     public IUnit prepare(String name, IInput input, IUnitProcessor unitProcessor, IUnit parent) {
         OATUnit unit = new OATUnit(name, input, unitProcessor, parent, pdm);
-        unit.process();
+        if(!unit.process()) {
+            logger.info("Could not process unit %s", unit.getName());
+        }
         return unit;
-    }
-
-    // No support for saving yet
-    @Override
-    public IUnit reload(IBinaryFrames serializedData, IUnitProcessor unitProcessor, 
-            IUnit parent) {
-        return null;
     }
 
 } 
