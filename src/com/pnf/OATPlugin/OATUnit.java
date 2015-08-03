@@ -25,6 +25,7 @@ import com.pnfsoftware.jeb.core.units.IUnitProcessor;
 import com.pnfsoftware.jeb.util.IO;
 import com.pnfsoftware.jeb.util.logging.GlobalLog;
 import com.pnfsoftware.jeb.util.logging.ILogger;
+import com.pnfsoftware.jeb.util.serialization.annotations.SerConstructor;
 
 public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
 	private static final ILogger logger = GlobalLog.getLogger(OATUnit.class);
@@ -42,6 +43,8 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
 		}
 
 	}
+    @SerConstructor
+    public OATUnit() {}
 
 	@Override
 	public boolean process() {
