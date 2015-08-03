@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.pnf.OAT.DexFile;
 import com.pnf.OAT.OATFile;
+import com.pnfsoftware.jeb.core.IUnitCreator;
 import com.pnfsoftware.jeb.core.actions.ActionContext;
 import com.pnfsoftware.jeb.core.actions.IActionData;
 import com.pnfsoftware.jeb.core.input.BytesInput;
@@ -35,7 +36,7 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     private OATFile oat;
     private byte[] data;
 
-    public OATUnit(String name, IInput input, IUnitProcessor unitProcessor, IUnit parent, IPropertyDefinitionManager pdm) {
+    public OATUnit(String name, IInput input, IUnitProcessor unitProcessor, IUnitCreator parent, IPropertyDefinitionManager pdm) {
         super("", input, "OAT", name, unitProcessor, parent, pdm);
         try(InputStream stream = input.getStream()) {
             data = IO.readInputStream(stream);
@@ -65,7 +66,6 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
 
     @Override
     public String getStatus() {
-        logger.info("Getting status");
         return processed ? "Processed" : "Not Processed";
     }
     @Override
@@ -87,11 +87,6 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     }
 
 
-    // No support for saving
-    @Override
-    public IBinaryFrames serialize() {
-        return null;
-    }
 
     @Override
     public IUnitFormatter getFormatter() {
