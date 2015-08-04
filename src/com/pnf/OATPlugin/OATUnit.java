@@ -1,3 +1,21 @@
+/*
+ * JEB Copyright PNF Software, Inc.
+ * 
+ *     https://www.pnfsoftware.com
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.pnf.OATPlugin;
 
 import java.io.IOException;
@@ -20,80 +38,81 @@ import com.pnfsoftware.jeb.core.output.IUnitFormatter;
 import com.pnfsoftware.jeb.core.output.UnitFormatterAdapter;
 import com.pnfsoftware.jeb.core.properties.IPropertyDefinitionManager;
 import com.pnfsoftware.jeb.core.units.AbstractBinaryUnit;
-import com.pnfsoftware.jeb.core.units.IBinaryFrames;
 import com.pnfsoftware.jeb.core.units.IInteractiveUnit;
-import com.pnfsoftware.jeb.core.units.IUnit;
 import com.pnfsoftware.jeb.core.units.IUnitProcessor;
 import com.pnfsoftware.jeb.util.IO;
 import com.pnfsoftware.jeb.util.logging.GlobalLog;
 import com.pnfsoftware.jeb.util.logging.ILogger;
-
-
-
+import com.pnfsoftware.jeb.util.serialization.annotations.SerConstructor;
 
 public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     private static final ILogger logger = GlobalLog.getLogger(OATUnit.class);
     private OATFile oat;
     private byte[] data;
+    private String status = "Unprocessed";
 
-    public OATUnit(String name, IInput input, IUnitProcessor unitProcessor, IUnitCreator parent, IPropertyDefinitionManager pdm) {
-        super("", input, "OAT", name, unitProcessor, parent, pdm);
-        try(InputStream stream = input.getStream()) {
+    public OATUnit(String name, IInput input, IUnitProcessor unitProcessor,
+            IUnitCreator parent, IPropertyDefinitionManager pdm) {
+        super(null, input, OATPlugin.TYPE, name, unitProcessor, parent, pdm);
+        try (InputStream stream = input.getStream()) {
             data = IO.readInputStream(stream);
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             logger.catching(e);
         }
 
     }
-    public OATUnit(IBinaryFrames serializedData, IUnitProcessor unitProcessor, IUnit parent, IPropertyDefinitionManager pdm) {
-        //super(serializedData, unitProcessor, parent, pdm);
+
+    @SerConstructor
+    public OATUnit() {
     }
 
     @Override
     public boolean process() {
+        if (isProcessed()) {
+            return true;
+        }
         oat = new OATFile(data);
 
-        int index = 1;
-        for(DexFile dex : oat.getDexFiles()) {
-            children.add(unitProcessor.process(dex.getLocation(), new BytesInput(dex.getBytes()), this));
-            index++;
+        for (DexFile dex : oat.getDexFiles()) {
+            children.add(unitProcessor.process(dex.getLocation(),
+                    new BytesInput(dex.getBytes()), this));
         }
         processed = true;
+        status = "Processed";
+
         return true;
     }
 
-
     @Override
     public String getStatus() {
-        return processed ? "Processed" : "Not Processed";
+        return status;
     }
+
     @Override
     public String getDescription() {
-        return super.getDescription() + getNotes();
-    }
-    @Override
-    public String getNotes() {
         // Put together info about the opened OAT file
         String output = "- Notes:\n";
         output += "  - " + "OAT Version: " + oat.getVersion() + "\n";
         output += "  - " + "Dex File Count: " + oat.getDexFileCount() + "\n";
-
         output += "  - " + "Dex File Paths:\n";
-        for(DexFile dex : oat.getDexFiles()) {
+        for (DexFile dex : oat.getDexFiles()) {
             output += "    - " + dex.getLocation() + "\n";
         }
         return output;
     }
 
-
+    @Override
+    public boolean isProcessed() {
+        return oat != null;
+    }
 
     @Override
     public IUnitFormatter getFormatter() {
         UnitFormatterAdapter formatter = new UnitFormatterAdapter();
 
         // Add key value store view
-        formatter.addDocumentPresentation(new AbstractUnitRepresentation("Key Value Store", false) {
+        formatter.addDocumentPresentation(new AbstractUnitRepresentation(
+                "Key Value Store", false) {
             @Override
             public IGenericDocument getDocument() {
                 return new KeyValueStoreDocument(oat);
@@ -112,6 +131,7 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     public boolean prepareExecution(ActionContext context, IActionData data) {
         return false;
     }
+
     @Override
     public boolean canExecuteAction(ActionContext context) {
         return false;
@@ -124,17 +144,20 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
 
     @Override
     public long getItemAtAddress(String address) {
-        
+
         return 1L;
     }
+
     @Override
     public String getAddressOfItem(long id) {
         return null;
     }
+
     @Override
     public List<Integer> getGlobalActions() {
         return new ArrayList<>();
     }
+
     @Override
     public List<Integer> getAddressActions(String address) {
         return new ArrayList<>();
@@ -144,22 +167,27 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     public String getComment(String address) {
         return null;
     }
+
     @Override
     public Map<String, String> getComments() {
         return null;
     }
+
     @Override
     public String getAddressLabel(String address) {
         return null;
     }
+
     @Override
     public Map<String, String> getAddressLabels() {
         return null;
     }
+
     @Override
     public String locationToAddress(IInputLocationInformation location) {
         return null;
     }
+
     @Override
     public IInputLocationInformation addressToLocation(String address) {
         return null;

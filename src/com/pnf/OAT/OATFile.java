@@ -1,3 +1,21 @@
+/*
+ * JEB Copyright PNF Software, Inc.
+ * 
+ *     https://www.pnfsoftware.com
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.pnf.OAT;
 
 import java.io.ByteArrayInputStream;
@@ -5,7 +23,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@SuppressWarnings("unused")
 public class OATFile extends StreamReader {
     private byte[] magic = new byte[4];
     private int version;
@@ -30,8 +48,6 @@ public class OATFile extends StreamReader {
     private int keyValueStoreSize;
     private byte[] keyValueStore;
 
-
-
     private List<DexFile> dexFiles = new ArrayList<>();
 
     public OATFile(byte[] data) {
@@ -40,23 +56,25 @@ public class OATFile extends StreamReader {
 
         // Compare the magic numbers at start of oat
         stream.read(magic, 0, 4);
-        if(!checkBytes(data, 0, OAT.magic)) {
+        if (!checkBytes(data, 0, OAT.magic)) {
             throw new IllegalArgumentException("Magic number does not match");
         }
 
-        // Get oat format version. Parser designed on version 39, which is compatible 
+        // Get oat format version. Parser designed on version 39, which is
+        // compatible
         // at least until 45 (current at time of writing)
-        version = Integer.parseInt(new String(readString(stream)).replaceFirst("^0+(?!$)", "").trim());
+        version = Integer.parseInt(new String(readString(stream)).replaceFirst(
+                "^0+(?!$)", "").trim());
 
         // Not useful. Does not represent the header's data alone
         checksum = readInt(stream);
-        
-        if(version >= 39 && version <= 45) {
+
+        if (version >= 39 && version <= 45) {
 
             // OAT HEADER FORMAT -- version 39
             // Bytes: name
-            // 0-3  : magic num (oat\n)
-            // 4-7  : OAT version
+            // 0-3 : magic num (oat\n)
+            // 4-7 : OAT version
             // 8-11 : checksum of header
             // 12-15: ISA
             // 16-19: ISA features bitmask
@@ -78,11 +96,11 @@ public class OATFile extends StreamReader {
             // 80-83: key value store length
             // 80-~~: key value store - hold some info about compilation
             // Start dex headers
-            // 0-3  : dex file location size
+            // 0-3 : dex file location size
             // 4-~~ : dex file location path string
-            // 0-3  : dex file location checksum
-            // 4-7  : dex file pointer from start of oatdata
-            
+            // 0-3 : dex file location checksum
+            // 4-7 : dex file pointer from start of oatdata
+
             // ISA - see OAT.java
             instructionSet = readInt(stream);
             instructionSetFeatures = readInt(stream);
@@ -102,10 +120,11 @@ public class OATFile extends StreamReader {
             imagePatchDelta = readInt(stream);
             imageFileLocationOatChecksum = readInt(stream);
             imageFileLocationOatDataBegin = readInt(stream);
-            // KeyValueStoreSize needs to be read to give some compilation information
+            // KeyValueStoreSize needs to be read to give some compilation
+            // information
             keyValueStoreSize = readInt(stream);
             keyValueStore = new byte[keyValueStoreSize];
-            for(int index=0; index < keyValueStoreSize; index++) {
+            for (int index = 0; index < keyValueStoreSize; index++) {
                 stream.read(keyValueStore, index, 1);
             }
 
@@ -121,7 +140,7 @@ public class OATFile extends StreamReader {
             int current = 0;
             OutputStream file;
             // Loop through the dex file headers. Will be dexFileCount of them
-            for(int index=0; index < dexFileCount; index++) {
+            for (int index = 0; index < dexFileCount; index++) {
                 // Loop through dex file headers
                 // Number of characters in dex files location data
                 dexFileLocationSize = readInt(stream);
@@ -131,23 +150,27 @@ public class OATFile extends StreamReader {
                 dexFileLocationChecksum = readInt(stream);
                 // Pointer to location of dex file within the oat file
                 dexFilePointer = readInt(stream);
-                // Create a dex file out of the bytes starting from dexFilePointer ->
+                // Create a dex file out of the bytes starting from
+                // dexFilePointer ->
                 // end of the oatfile. (Can't trust dex files size numbers)
-                dexFiles.add(new DexFile(data, dexFilePointer, data.length - dexFilePointer, dexFileLocation));
+                dexFiles.add(new DexFile(data, dexFilePointer, data.length
+                        - dexFilePointer, dexFileLocation));
 
-                // Calculate the location of the information about number of classes in the dex file
-                // I don't believe that this can be obfuscated successfully, but it is a point of
+                // Calculate the location of the information about number of
+                // classes in the dex file
+                // I don't believe that this can be obfuscated successfully, but
+                // it is a point of
                 // failure if it can be changed
                 current = data.length - stream.available();
-                classes_offsets_size = readInt(stream, dexFilePointer - current + 96);
+                classes_offsets_size = readInt(stream, dexFilePointer - current
+                        + 96);
                 stream.skip(classes_offsets_size * 4);
             }
-        }
-        else {
-            throw new IllegalArgumentException("Unsupported OAT version " + version);
+        } else {
+            throw new IllegalArgumentException("Unsupported OAT version "
+                    + version);
         }
     }
-
 
     public int getVersion() {
         return version;
@@ -163,25 +186,26 @@ public class OATFile extends StreamReader {
 
     public String getISAString() {
         // Might use this in a description
-        switch(instructionSet) {
-            case OAT.kArm:
-                return "kArm";
-            case OAT.kArm64:
-                return "kArm64";
-            case OAT.kThumb2:
-                return "kThumb2";
-            case OAT.kX86:
-                return "kX86";
-            case OAT.X86_64:
-                return "X86_64";
-            case OAT.kMips:
-                return "kMips";
-            case OAT.kMips64:
-                return "kMips64";
-            default:
-                return "kNone";
+        switch (instructionSet) {
+        case OAT.kArm:
+            return "kArm";
+        case OAT.kArm64:
+            return "kArm64";
+        case OAT.kThumb2:
+            return "kThumb2";
+        case OAT.kX86:
+            return "kX86";
+        case OAT.X86_64:
+            return "X86_64";
+        case OAT.kMips:
+            return "kMips";
+        case OAT.kMips64:
+            return "kMips64";
+        default:
+            return "kNone";
         }
     }
+
     public String getKeyValueStore() {
         // Get the info from key value store
         // The returned string alternates
