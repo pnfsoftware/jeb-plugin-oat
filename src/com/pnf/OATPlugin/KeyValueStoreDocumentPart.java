@@ -7,21 +7,21 @@ import com.pnfsoftware.jeb.core.output.table.ITableDocumentPart;
 import com.pnfsoftware.jeb.core.output.table.impl.TableRow;
 
 public class KeyValueStoreDocumentPart implements ITableDocumentPart {
-	private ArrayList<TableRow> rows;
-	private int rowIndex;
+    private ArrayList<TableRow> rows;
+    private int rowIndex;
 
-	public KeyValueStoreDocumentPart(int rowIndex, List<TableRow> rows) {
-		this.rowIndex = rowIndex;
-		this.rows = new ArrayList<>(rows);
-	}
+    public KeyValueStoreDocumentPart(int rowIndex, List<TableRow> rows) {
+        this.rowIndex = rowIndex;
+        this.rows = new ArrayList<>(rows);
+    }
 
-	@Override
-	public int getFirstRowIndex() {
-		return rowIndex;
-	}
+    @Override
+    public int getFirstRowIndex() {
+        return rowIndex;
+    }
 
-	@Override
-	public List<TableRow> getRows() {
-		return rows;
-	}
+    @Override
+    public List<TableRow> getRows() {
+        return rows;
+    }
 }
