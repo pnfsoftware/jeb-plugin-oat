@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.pnf.OAT;
+package com.pnf.plugin.oat.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
@@ -56,20 +56,19 @@ public class OATFile extends StreamReader {
 
         // Compare the magic numbers at start of oat
         stream.read(magic, 0, 4);
-        if (!checkBytes(data, 0, OAT.magic)) {
+        if(!checkBytes(data, 0, OAT.magic)) {
             throw new IllegalArgumentException("Magic number does not match");
         }
 
         // Get oat format version. Parser designed on version 39, which is
         // compatible
         // at least until 45 (current at time of writing)
-        version = Integer.parseInt(new String(readString(stream)).replaceFirst(
-                "^0+(?!$)", "").trim());
+        version = Integer.parseInt(new String(readString(stream)).replaceFirst("^0+(?!$)", "").trim());
 
         // Not useful. Does not represent the header's data alone
         checksum = readInt(stream);
 
-        if (version >= 39 && version <= 45) {
+        if(version >= 39 && version <= 45) {
 
             // OAT HEADER FORMAT -- version 39
             // Bytes: name
@@ -124,7 +123,7 @@ public class OATFile extends StreamReader {
             // information
             keyValueStoreSize = readInt(stream);
             keyValueStore = new byte[keyValueStoreSize];
-            for (int index = 0; index < keyValueStoreSize; index++) {
+            for(int index = 0; index < keyValueStoreSize; index++) {
                 stream.read(keyValueStore, index, 1);
             }
 
@@ -140,7 +139,7 @@ public class OATFile extends StreamReader {
             int current = 0;
             OutputStream file;
             // Loop through the dex file headers. Will be dexFileCount of them
-            for (int index = 0; index < dexFileCount; index++) {
+            for(int index = 0; index < dexFileCount; index++) {
                 // Loop through dex file headers
                 // Number of characters in dex files location data
                 dexFileLocationSize = readInt(stream);
@@ -153,8 +152,7 @@ public class OATFile extends StreamReader {
                 // Create a dex file out of the bytes starting from
                 // dexFilePointer ->
                 // end of the oatfile. (Can't trust dex files size numbers)
-                dexFiles.add(new DexFile(data, dexFilePointer, data.length
-                        - dexFilePointer, dexFileLocation));
+                dexFiles.add(new DexFile(data, dexFilePointer, data.length - dexFilePointer, dexFileLocation));
 
                 // Calculate the location of the information about number of
                 // classes in the dex file
@@ -162,13 +160,12 @@ public class OATFile extends StreamReader {
                 // it is a point of
                 // failure if it can be changed
                 current = data.length - stream.available();
-                classes_offsets_size = readInt(stream, dexFilePointer - current
-                        + 96);
+                classes_offsets_size = readInt(stream, dexFilePointer - current + 96);
                 stream.skip(classes_offsets_size * 4);
             }
-        } else {
-            throw new IllegalArgumentException("Unsupported OAT version "
-                    + version);
+        }
+        else {
+            throw new IllegalArgumentException("Unsupported OAT version " + version);
         }
     }
 
@@ -186,7 +183,7 @@ public class OATFile extends StreamReader {
 
     public String getISAString() {
         // Might use this in a description
-        switch (instructionSet) {
+        switch(instructionSet) {
         case OAT.kArm:
             return "kArm";
         case OAT.kArm64:

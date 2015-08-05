@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.pnf.OAT;
+package com.pnf.plugin.oat.internal;
 
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
@@ -27,8 +27,7 @@ import com.pnfsoftware.jeb.util.logging.ILogger;
 
 public class StreamReader {
     // Give a logger to all subclasses
-    protected static final ILogger logger = GlobalLog
-            .getLogger(StreamReader.class);
+    protected static final ILogger logger = GlobalLog.getLogger(StreamReader.class);
 
     // Read an int from the stream at an offset from the current position
     // Leaves a mark
@@ -70,9 +69,9 @@ public class StreamReader {
     protected static String readString(ByteArrayInputStream stream) {
         String output = "";
         char character;
-        while (stream.available() > 0) {
-            character = (char) stream.read();
-            if (character == 0)
+        while(stream.available() > 0) {
+            character = (char)stream.read();
+            if(character == 0)
                 break;
             output = output + character;
         }
@@ -83,18 +82,17 @@ public class StreamReader {
     protected static String readString(ByteArrayInputStream stream, int length) {
         String output = "";
         char character;
-        for (int index = 0; index < length; index++) {
-            character = (char) stream.read();
+        for(int index = 0; index < length; index++) {
+            character = (char)stream.read();
             output = output + character;
         }
         return output;
     }
 
     // Extra implementation of checkbytes. Does byte by byte comparison
-    protected static boolean checkBytes(byte[] data, int offset,
-            byte... checkBytes) {
-        for (int index = 0; index < checkBytes.length; index++) {
-            if (data[offset + index] != checkBytes[index])
+    protected static boolean checkBytes(byte[] data, int offset, byte... checkBytes) {
+        for(int index = 0; index < checkBytes.length; index++) {
+            if(data[offset + index] != checkBytes[index])
                 return false;
         }
         return true;

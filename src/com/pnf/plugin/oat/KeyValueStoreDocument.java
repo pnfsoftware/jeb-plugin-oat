@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 
-package com.pnf.OATPlugin;
+package com.pnf.plugin.oat;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.pnf.OAT.OATFile;
+import com.pnf.plugin.oat.internal.OATFile;
 import com.pnfsoftware.jeb.core.events.JebEventSource;
 import com.pnfsoftware.jeb.core.output.table.ICellCoordinates;
 import com.pnfsoftware.jeb.core.output.table.ITableDocument;
@@ -29,8 +29,7 @@ import com.pnfsoftware.jeb.core.output.table.ITableDocumentPart;
 import com.pnfsoftware.jeb.core.output.table.impl.Cell;
 import com.pnfsoftware.jeb.core.output.table.impl.TableRow;
 
-public class KeyValueStoreDocument extends JebEventSource implements
-        ITableDocument {
+public class KeyValueStoreDocument extends JebEventSource implements ITableDocument {
 
     // View of the keyvalue store in the OAT's header
 
@@ -46,7 +45,7 @@ public class KeyValueStoreDocument extends JebEventSource implements
         String key;
         String value;
         List<Cell> cells = new ArrayList<>();
-        for (int index = 0; index < keyValueStore.length / 2; index++) {
+        for(int index = 0; index < keyValueStore.length / 2; index++) {
             cells = new ArrayList<>();
             key = keyValueStore[index * 2];
             value = keyValueStore[index * 2 + 1];
@@ -78,8 +77,7 @@ public class KeyValueStoreDocument extends JebEventSource implements
 
     @Override
     public ITableDocumentPart getTablePart(int start, int count) {
-        return new KeyValueStoreDocumentPart(start, rows.subList(start, start
-                + count));
+        return new KeyValueStoreDocumentPart(start, rows.subList(start, start + count));
     }
 
     @Override

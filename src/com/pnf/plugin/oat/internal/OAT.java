@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.pnf.OAT;
+package com.pnf.plugin.oat.internal;
 
 public class OAT {
 

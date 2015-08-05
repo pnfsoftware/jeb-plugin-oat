@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.pnf.OATPlugin;
+package com.pnf.plugin.oat;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.pnf.OAT.DexFile;
-import com.pnf.OAT.OATFile;
+import com.pnf.plugin.oat.internal.DexFile;
+import com.pnf.plugin.oat.internal.OATFile;
 import com.pnfsoftware.jeb.core.IUnitCreator;
 import com.pnfsoftware.jeb.core.actions.ActionContext;
 import com.pnfsoftware.jeb.core.actions.IActionData;
@@ -51,12 +51,13 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     private byte[] data;
     private String status = "Unprocessed";
 
-    public OATUnit(String name, IInput input, IUnitProcessor unitProcessor,
-            IUnitCreator parent, IPropertyDefinitionManager pdm) {
+    public OATUnit(String name, IInput input, IUnitProcessor unitProcessor, IUnitCreator parent,
+            IPropertyDefinitionManager pdm) {
         super(null, input, OATPlugin.TYPE, name, unitProcessor, parent, pdm);
-        try (InputStream stream = input.getStream()) {
+        try(InputStream stream = input.getStream()) {
             data = IO.readInputStream(stream);
-        } catch (IOException e) {
+        }
+        catch(IOException e) {
             logger.catching(e);
         }
 
@@ -68,14 +69,13 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
 
     @Override
     public boolean process() {
-        if (isProcessed()) {
+        if(isProcessed()) {
             return true;
         }
         oat = new OATFile(data);
 
-        for (DexFile dex : oat.getDexFiles()) {
-            children.add(unitProcessor.process(dex.getLocation(),
-                    new BytesInput(dex.getBytes()), this));
+        for(DexFile dex : oat.getDexFiles()) {
+            children.add(unitProcessor.process(dex.getLocation(), new BytesInput(dex.getBytes()), this));
         }
         processed = true;
         status = "Processed";
@@ -95,7 +95,7 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
         output += "  - " + "OAT Version: " + oat.getVersion() + "\n";
         output += "  - " + "Dex File Count: " + oat.getDexFileCount() + "\n";
         output += "  - " + "Dex File Paths:\n";
-        for (DexFile dex : oat.getDexFiles()) {
+        for(DexFile dex : oat.getDexFiles()) {
             output += "    - " + dex.getLocation() + "\n";
         }
         return output;
@@ -111,8 +111,7 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
         UnitFormatterAdapter formatter = new UnitFormatterAdapter();
 
         // Add key value store view
-        formatter.addDocumentPresentation(new AbstractUnitRepresentation(
-                "Key Value Store", false) {
+        formatter.addDocumentPresentation(new AbstractUnitRepresentation("Key Value Store", false) {
             @Override
             public IGenericDocument getDocument() {
                 return new KeyValueStoreDocument(oat);

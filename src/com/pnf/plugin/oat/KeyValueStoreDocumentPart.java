@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.pnf.OATPlugin;
+package com.pnf.plugin.oat;
 
 import java.util.ArrayList;
 import java.util.List;
