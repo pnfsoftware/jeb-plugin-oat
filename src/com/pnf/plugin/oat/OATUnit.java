@@ -49,7 +49,6 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     private static final ILogger logger = GlobalLog.getLogger(OATUnit.class);
     private OATFile oat;
     private byte[] data;
-    private String status = "Unprocessed";
 
     public OATUnit(String name, IInput input, IUnitProcessor unitProcessor, IUnitCreator parent,
             IPropertyDefinitionManager pdm) {
@@ -60,7 +59,6 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
         catch(IOException e) {
             logger.catching(e);
         }
-
     }
 
     @SerConstructor
@@ -74,7 +72,7 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
         }
         oat = new OATFile(data);
 
-        for(DexFile dex : oat.getDexFiles()) {
+        for(DexFile dex: oat.getDexFiles()) {
             children.add(unitProcessor.process(dex.getLocation(), new BytesInput(dex.getBytes()), this));
         }
         processed = true;
@@ -84,18 +82,13 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     }
 
     @Override
-    public String getStatus() {
-        return status;
-    }
-
-    @Override
     public String getDescription() {
         // Put together info about the opened OAT file
         String output = "- Notes:\n";
         output += "  - " + "OAT Version: " + oat.getVersion() + "\n";
         output += "  - " + "Dex File Count: " + oat.getDexFileCount() + "\n";
         output += "  - " + "Dex File Paths:\n";
-        for(DexFile dex : oat.getDexFiles()) {
+        for(DexFile dex: oat.getDexFiles()) {
             output += "    - " + dex.getLocation() + "\n";
         }
         return output;

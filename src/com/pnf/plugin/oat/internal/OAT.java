@@ -21,7 +21,7 @@ package com.pnf.plugin.oat.internal;
 public class OAT {
 
     // Oat magic numbers
-    public static final byte[] magic = new byte[] { 'o', 'a', 't', '\n' };
+    public static final byte[] magic = new byte[]{'o', 'a', 't', '\n'};
 
     // ISA constants - incomplete list but still useful
     public static final int kNone = 0;
