@@ -20,33 +20,31 @@ package com.pnf.plugin.oat;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import com.pnf.plugin.oat.internal.DexFile;
 import com.pnf.plugin.oat.internal.OATFile;
 import com.pnfsoftware.jeb.core.IUnitCreator;
-import com.pnfsoftware.jeb.core.actions.ActionContext;
-import com.pnfsoftware.jeb.core.actions.IActionData;
 import com.pnfsoftware.jeb.core.input.BytesInput;
 import com.pnfsoftware.jeb.core.input.IInput;
-import com.pnfsoftware.jeb.core.input.IInputLocationInformation;
 import com.pnfsoftware.jeb.core.output.AbstractUnitRepresentation;
 import com.pnfsoftware.jeb.core.output.IGenericDocument;
 import com.pnfsoftware.jeb.core.output.IUnitFormatter;
-import com.pnfsoftware.jeb.core.output.UnitFormatterAdapter;
+import com.pnfsoftware.jeb.core.output.UnitFormatterUtil;
 import com.pnfsoftware.jeb.core.properties.IPropertyDefinitionManager;
-import com.pnfsoftware.jeb.core.units.AbstractBinaryUnit;
-import com.pnfsoftware.jeb.core.units.IInteractiveUnit;
+import com.pnfsoftware.jeb.core.units.AbstractInteractiveBinaryUnit;
 import com.pnfsoftware.jeb.core.units.IUnitProcessor;
 import com.pnfsoftware.jeb.util.IO;
 import com.pnfsoftware.jeb.util.logging.GlobalLog;
 import com.pnfsoftware.jeb.util.logging.ILogger;
 import com.pnfsoftware.jeb.util.serialization.annotations.SerConstructor;
 
-public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
+/**
+ * 
+ * 
+ */
+public class OATUnit extends AbstractInteractiveBinaryUnit {
     private static final ILogger logger = GlobalLog.getLogger(OATUnit.class);
+
     private OATFile oat;
     private byte[] data;
 
@@ -66,18 +64,23 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     }
 
     @Override
+    public boolean isProcessed() {
+        return oat != null;
+    }
+
+    @Override
     public boolean process() {
         if(isProcessed()) {
             return true;
         }
+
         oat = new OATFile(data);
 
         for(DexFile dex: oat.getDexFiles()) {
-            children.add(unitProcessor.process(dex.getLocation(), new BytesInput(dex.getBytes()), this));
+            addChild(getUnitProcessor().process(dex.getLocation(), new BytesInput(dex.getBytes()), this));
         }
-        processed = true;
-        status = "Processed";
 
+        setProcessed(true);
         return true;
     }
 
@@ -95,93 +98,16 @@ public class OATUnit extends AbstractBinaryUnit implements IInteractiveUnit {
     }
 
     @Override
-    public boolean isProcessed() {
-        return oat != null;
-    }
-
-    @Override
     public IUnitFormatter getFormatter() {
-        UnitFormatterAdapter formatter = new UnitFormatterAdapter();
-
-        // Add key value store view
-        formatter.addDocumentPresentation(new AbstractUnitRepresentation("Key Value Store", false) {
-            @Override
-            public IGenericDocument getDocument() {
-                return new KeyValueStoreDocument(oat);
-            }
-        });
+        IUnitFormatter formatter = super.getFormatter();
+        if(UnitFormatterUtil.getPresentationByIdentifier(formatter, 1) == null) {
+            formatter.addPresentation(new AbstractUnitRepresentation(1, "Key Value Store", false) {
+                @Override
+                public IGenericDocument getDocument() {
+                    return new KeyValueStoreDocument(oat);
+                }
+            }, false);
+        }
         return formatter;
-    }
-
-    // Currently actions are not supported, ignore all.
-    @Override
-    public boolean executeAction(ActionContext context, IActionData data) {
-        return false;
-    }
-
-    @Override
-    public boolean prepareExecution(ActionContext context, IActionData data) {
-        return false;
-    }
-
-    @Override
-    public boolean canExecuteAction(ActionContext context) {
-        return false;
-    }
-
-    @Override
-    public List<Integer> getItemActions(long id) {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public long getItemAtAddress(String address) {
-
-        return 1L;
-    }
-
-    @Override
-    public String getAddressOfItem(long id) {
-        return null;
-    }
-
-    @Override
-    public List<Integer> getGlobalActions() {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public List<Integer> getAddressActions(String address) {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public String getComment(String address) {
-        return null;
-    }
-
-    @Override
-    public Map<String, String> getComments() {
-        return null;
-    }
-
-    @Override
-    public String getAddressLabel(String address) {
-        return null;
-    }
-
-    @Override
-    public Map<String, String> getAddressLabels() {
-        return null;
-    }
-
-    @Override
-    public String locationToAddress(IInputLocationInformation location) {
-        return null;
-    }
-
-    @Override
-    public IInputLocationInformation addressToLocation(String address) {
-        return null;
     }
 }
