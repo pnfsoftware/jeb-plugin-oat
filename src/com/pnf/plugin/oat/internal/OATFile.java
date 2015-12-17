@@ -23,32 +23,67 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("unused")
-public class OATFile extends StreamReader {
-    private byte[] magic = new byte[4];
-    private int version;
-    private int checksum;
-    private int instructionSet;
-    private int instructionSetFeatures;
-    private int dexFileCount;
-    private int executableOffset;
-    private int interpreterToInterpreterBridgeOffset;
-    private int interpreterToCompiledCodeBridgeOffset;
-    private int jniDlsymLookupOffset;
-    private int portableImtConflictTrampolineOffset;
-    private int portableResolutionTrampolineOffset;
-    private int portableToInterpreterBridgeOffset;
-    private int quickGenericJniTrampolineOffset;
-    private int quickImtConflictTrampolineOffset;
-    private int quickResolutionTrampolineOffset;
-    private int quickToInterpreterBridgeOffset;
-    private int imagePatchDelta;
-    private int imageFileLocationOatChecksum;
-    private int imageFileLocationOatDataBegin;
-    private int keyValueStoreSize;
-    private byte[] keyValueStore;
+import com.pnfsoftware.jeb.util.serialization.annotations.Ser;
+import com.pnfsoftware.jeb.util.serialization.annotations.SerConstructor;
+import com.pnfsoftware.jeb.util.serialization.annotations.SerId;
 
+/**
+ * Description of an OAT file.
+ * 
+ */
+@SuppressWarnings("unused")
+@Ser
+public class OATFile extends StreamReader {
+    @SerId(1)
+    private byte[] magic = new byte[4];
+    @SerId(2)
+    private int version;
+    @SerId(3)
+    private int checksum;
+    @SerId(4)
+    private int instructionSet;
+    @SerId(5)
+    private int instructionSetFeatures;
+    @SerId(6)
+    private int dexFileCount;
+    @SerId(7)
+    private int executableOffset;
+    @SerId(8)
+    private int interpreterToInterpreterBridgeOffset;
+    @SerId(9)
+    private int interpreterToCompiledCodeBridgeOffset;
+    @SerId(10)
+    private int jniDlsymLookupOffset;
+    @SerId(11)
+    private int portableImtConflictTrampolineOffset;
+    @SerId(12)
+    private int portableResolutionTrampolineOffset;
+    @SerId(13)
+    private int portableToInterpreterBridgeOffset;
+    @SerId(14)
+    private int quickGenericJniTrampolineOffset;
+    @SerId(15)
+    private int quickImtConflictTrampolineOffset;
+    @SerId(16)
+    private int quickResolutionTrampolineOffset;
+    @SerId(17)
+    private int quickToInterpreterBridgeOffset;
+    @SerId(18)
+    private int imagePatchDelta;
+    @SerId(19)
+    private int imageFileLocationOatChecksum;
+    @SerId(20)
+    private int imageFileLocationOatDataBegin;
+    @SerId(21)
+    private int keyValueStoreSize;
+    @SerId(22)
+    private byte[] keyValueStore;
+    @SerId(23)
     private List<DexFile> dexFiles = new ArrayList<>();
+
+    @SerConstructor
+    protected OATFile() {
+    }
 
     public OATFile(byte[] data) {
         ByteArrayInputStream stream = new ByteArrayInputStream(data);
@@ -210,5 +245,4 @@ public class OATFile extends StreamReader {
         // the null character '\0'
         return new String(keyValueStore);
     }
-
 }

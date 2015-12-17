@@ -36,31 +36,24 @@ import com.pnfsoftware.jeb.core.units.IUnitProcessor;
 import com.pnfsoftware.jeb.util.IO;
 import com.pnfsoftware.jeb.util.logging.GlobalLog;
 import com.pnfsoftware.jeb.util.logging.ILogger;
+import com.pnfsoftware.jeb.util.serialization.annotations.Ser;
 import com.pnfsoftware.jeb.util.serialization.annotations.SerConstructor;
+import com.pnfsoftware.jeb.util.serialization.annotations.SerId;
 
-/**
- * 
- * 
- */
+@Ser
 public class OATUnit extends AbstractInteractiveBinaryUnit {
     private static final ILogger logger = GlobalLog.getLogger(OATUnit.class);
 
+    @SerId(1)
     private OATFile oat;
-    private byte[] data;
+
+    @SerConstructor
+    protected OATUnit() {
+    }
 
     public OATUnit(String name, IInput input, IUnitProcessor unitProcessor, IUnitCreator parent,
             IPropertyDefinitionManager pdm) {
         super(null, input, OATPlugin.TYPE, name, unitProcessor, parent, pdm);
-        try(InputStream stream = input.getStream()) {
-            data = IO.readInputStream(stream);
-        }
-        catch(IOException e) {
-            logger.catching(e);
-        }
-    }
-
-    @SerConstructor
-    public OATUnit() {
     }
 
     @Override
@@ -74,10 +67,18 @@ public class OATUnit extends AbstractInteractiveBinaryUnit {
             return true;
         }
 
-        oat = new OATFile(data);
+        try(InputStream stream = getInput().getStream()) {
+            byte[] data = IO.readInputStream(stream);
 
-        for(DexFile dex: oat.getDexFiles()) {
-            addChild(getUnitProcessor().process(dex.getLocation(), new BytesInput(dex.getBytes()), this));
+            oat = new OATFile(data);
+
+            for(DexFile dex: oat.getDexFiles()) {
+                addChild(getUnitProcessor().process(dex.getLocation(), new BytesInput(dex.getBytes()), this));
+            }
+        }
+        catch(IOException e) {
+            logger.catching(e);
+            return false;
         }
 
         setProcessed(true);
@@ -101,7 +102,7 @@ public class OATUnit extends AbstractInteractiveBinaryUnit {
     public IUnitFormatter getFormatter() {
         IUnitFormatter formatter = super.getFormatter();
         if(UnitFormatterUtil.getPresentationByIdentifier(formatter, 1) == null) {
-            formatter.addPresentation(new AbstractUnitRepresentation(1, "Key Value Store", false) {
+            formatter.addPresentation(new AbstractUnitRepresentation(1, "OAT KV-Store", true) {
                 @Override
                 public IGenericDocument getDocument() {
                     return new KeyValueStoreDocument(oat);

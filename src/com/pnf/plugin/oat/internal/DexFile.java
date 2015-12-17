@@ -18,14 +18,26 @@
 
 package com.pnf.plugin.oat.internal;
 
+import com.pnfsoftware.jeb.util.serialization.annotations.SerConstructor;
+import com.pnfsoftware.jeb.util.serialization.annotations.SerId;
+
+/**
+ * Wrapper for the bytes in a dexfile pulled from the oatfile
+ *
+ */
 public class DexFile extends StreamReader {
-
-    // Wrapper for the bytes in a dexfile pulled from the oatfile
-
+    @SerId(1)
     private byte[] data;
+    @SerId(2)
     private int offset;
+    @SerId(3)
     private int size;
+    @SerId(4)
     private String location;
+
+    @SerConstructor
+    DexFile() {
+    }
 
     public DexFile(byte[] data, int offset, int size, String location) {
         this.data = data;
@@ -45,5 +57,4 @@ public class DexFile extends StreamReader {
     public String getLocation() {
         return location;
     }
-
 }

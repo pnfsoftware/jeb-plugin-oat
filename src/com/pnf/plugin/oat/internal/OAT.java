@@ -18,6 +18,10 @@
 
 package com.pnf.plugin.oat.internal;
 
+/**
+ * Static constants.
+ *
+ */
 public class OAT {
 
     // Oat magic numbers

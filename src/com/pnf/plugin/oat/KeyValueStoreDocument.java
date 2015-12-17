@@ -29,12 +29,12 @@ import com.pnfsoftware.jeb.core.output.table.ITableDocumentPart;
 import com.pnfsoftware.jeb.core.output.table.impl.Cell;
 import com.pnfsoftware.jeb.core.output.table.impl.TableRow;
 
+/**
+ * View of the keyvalue store in the OAT's header.
+ * 
+ */
 public class KeyValueStoreDocument extends JebEventSource implements ITableDocument {
-
-    // View of the keyvalue store in the OAT's header
-
     List<TableRow> rows;
-
     OATFile oat;
 
     public KeyValueStoreDocument(OATFile oat) {
@@ -92,7 +92,5 @@ public class KeyValueStoreDocument extends JebEventSource implements ITableDocum
 
     @Override
     public void dispose() {
-
     }
-
 }
