@@ -87,13 +87,14 @@ public class OATUnit extends AbstractInteractiveBinaryUnit {
 
     @Override
     public String getDescription() {
-        // Put together info about the opened OAT file
-        String output = "- Notes:\n";
-        output += "  - " + "OAT Version: " + oat.getVersion() + "\n";
-        output += "  - " + "Dex File Count: " + oat.getDexFileCount() + "\n";
-        output += "  - " + "Dex File Paths:\n";
+        String output = super.getDescription();
+        output += "\nOAT information:\n";
+        output += "- Version: " + oat.getVersion() + "\n";
+        output += "- Target ISA: " + oat.getISAString() + "\n";
+        output += "- Dex file count: " + oat.getDexFileCount() + "\n";
+        output += "- Dex paths:\n";
         for(DexFile dex: oat.getDexFiles()) {
-            output += "    - " + dex.getLocation() + "\n";
+            output += "   - " + dex.getLocation() + "\n";
         }
         return output;
     }
