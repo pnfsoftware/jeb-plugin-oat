@@ -87,6 +87,7 @@ public class OATFile extends StreamReader {
     protected OATFile() {
     }
 
+    @SuppressWarnings("resource")
     public OATFile(byte[] data) {
         ByteArrayInputStream stream = new ByteArrayInputStream(data);
         int offset = 0;
@@ -154,7 +155,7 @@ public class OATFile extends StreamReader {
         interpreterToCompiledCodeBridgeOffset = readInt(stream);
         jniDlsymLookupOffset = readInt(stream);
 
-        if(version < 45) {
+        if(version <= 45) {
             portableImtConflictTrampolineOffset = readInt(stream);
             portableResolutionTrampolineOffset = readInt(stream);
             portableToInterpreterBridgeOffset = readInt(stream);
@@ -187,21 +188,25 @@ public class OATFile extends StreamReader {
         int dexFileOffset;
         int classes_offsets_size;
         int current = 0;
-        OutputStream file;
+
         // Loop through the dex file headers. Will be dexFileCount of them
         for(int index = 0; index < dexFileCount; index++) {
             // Loop through dex file headers
             // Number of characters in dex files location data
             dexFileLocationSize = readInt(stream);
+            if(dexFileLocationSize > 0x10000) {
+                throw new RuntimeException("Parsing error or corrupt OAT file");
+            }
+
             // Location of dex file to compile from on disk
             dexFileLocation = readString(stream, dexFileLocationSize);
             // Checksum of the location string
             dexFileLocationChecksum = readInt(stream);
             // Pointer to location of dex file within the oat file
             dexFilePointer = readInt(stream);
+
             // Create a dex file out of the bytes starting from
-            // dexFilePointer ->
-            // end of the oatfile. (Can't trust dex files size numbers)
+            // dexFilePointer -> end of the oatfile. (Can't trust dex files size numbers)
             dexFiles.add(new DexFile(data, dexFilePointer, data.length - dexFilePointer, dexFileLocation));
 
             // Calculate the location of the information about number of
