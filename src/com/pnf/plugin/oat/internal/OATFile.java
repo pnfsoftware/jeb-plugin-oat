@@ -110,7 +110,7 @@ public class OATFile extends StreamReader {
             throw new IllegalArgumentException("Unsupported OAT version " + version);
         }
 
-        if(version > 74) {
+        if(version > 88) {
             logger.warn("OAT version %d partially unsupported, unexpected behavior may happen", version);
         }
 
@@ -190,12 +190,14 @@ public class OATFile extends StreamReader {
         int current = 0;
 
         // Loop through the dex file headers. Will be dexFileCount of them
-        for(int index = 0; index < dexFileCount; index++) {
+        for(int idex = 0; idex < dexFileCount; idex++) {
             // Loop through dex file headers
+
             // Number of characters in dex files location data
             dexFileLocationSize = readInt(stream);
             if(dexFileLocationSize > 0x10000) {
-                throw new RuntimeException("Parsing error or corrupt OAT file");
+                logger.warning("OAT File entry format appears to be unsupported");
+                break;
             }
 
             // Location of dex file to compile from on disk
@@ -208,16 +210,38 @@ public class OATFile extends StreamReader {
             // Create a dex file out of the bytes starting from
             // dexFilePointer -> end of the oatfile. (Can't trust dex files size numbers)
             dexFiles.add(new DexFile(data, dexFilePointer, data.length - dexFilePointer, dexFileLocation));
-
-            // Calculate the location of the information about number of
-            // classes in the dex file
-            // I don't believe that this can be obfuscated successfully, but
-            // it is a point of
-            // failure if it can be changed
-            current = data.length - stream.available();
-            classes_offsets_size = readInt(stream, dexFilePointer - current + 96);
-            stream.skip(classes_offsets_size * 4);
         }
+
+        // heuristically search for 2+ entries, in order to handle OAT header format changes
+        if(dexFiles.size() < dexFileCount) {
+            logger.info("Searching for %d additional DEX files heuristically...", dexFileCount - dexFiles.size());
+            int idex = 2;
+            byte[] b = new byte[0x1000];
+            int n = stream.read(b, 0, 0x1000);
+            for(int i = 0; i <= n - 4; i++) {
+                int v = littleEndianBytesToInt(b, i);
+
+                if(v >= 0 && (v + 100) <= data.length) {
+                    int val = littleEndianBytesToInt(data, v);
+                    if(val == 0x0A786564) {
+                        String name = String.format("Unknown DEX #%d", dexFiles.size() + 1);
+                        dexFiles.add(new DexFile(data, v, data.length - v, name));
+                        if(dexFiles.size() >= dexFileCount) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static int littleEndianBytesToInt(byte[] array, int offset) {
+        //@formatter:off
+        return (array[offset] & 0xFF)
+                | ((array[offset + 1] << 8) & 0xFF00)
+                | ((array[offset + 2] << 16) & 0xFF0000)
+                | ((array[offset + 3] << 24) & 0xFF000000);
+        //@formatter:on
     }
 
     public int getVersion() {

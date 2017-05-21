@@ -37,7 +37,6 @@ import com.pnfsoftware.jeb.util.IO;
 import com.pnfsoftware.jeb.util.logging.GlobalLog;
 import com.pnfsoftware.jeb.util.logging.ILogger;
 import com.pnfsoftware.jeb.util.serialization.annotations.Ser;
-import com.pnfsoftware.jeb.util.serialization.annotations.SerConstructor;
 import com.pnfsoftware.jeb.util.serialization.annotations.SerId;
 
 @Ser
@@ -47,7 +46,7 @@ public class OATUnit extends AbstractInteractiveBinaryUnit {
     @SerId(1)
     private OATFile oat;
 
-    @SerConstructor
+    //@SerConstructor
     protected OATUnit() {
     }
 
