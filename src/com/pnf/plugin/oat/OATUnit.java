@@ -33,7 +33,7 @@ import com.pnfsoftware.jeb.core.output.UnitFormatterUtil;
 import com.pnfsoftware.jeb.core.properties.IPropertyDefinitionManager;
 import com.pnfsoftware.jeb.core.units.AbstractInteractiveBinaryUnit;
 import com.pnfsoftware.jeb.core.units.IUnitProcessor;
-import com.pnfsoftware.jeb.util.IO;
+import com.pnfsoftware.jeb.util.io.IO;
 import com.pnfsoftware.jeb.util.logging.GlobalLog;
 import com.pnfsoftware.jeb.util.logging.ILogger;
 import com.pnfsoftware.jeb.util.serialization.annotations.Ser;
@@ -45,10 +45,6 @@ public class OATUnit extends AbstractInteractiveBinaryUnit {
 
     @SerId(1)
     private OATFile oat;
-
-    //@SerConstructor
-    protected OATUnit() {
-    }
 
     public OATUnit(String name, IInput input, IUnitProcessor unitProcessor, IUnitCreator parent,
             IPropertyDefinitionManager pdm) {
