@@ -1,12 +1,2 @@
-.DS_STORE
-
 bin/
-lib/
-libs/
-testfiles/
-out/
-
-.*.sw*
-.classpath
-.project
 .settings/

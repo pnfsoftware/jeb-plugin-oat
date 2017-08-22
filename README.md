@@ -1,4 +1,4 @@
-# Android OAT Plugin for JEB2
+# Android OAT Plugin for JEB
 
 This plugin extracts dex files from compiled OAT files that are used by the Android Runtime.
 
@@ -17,3 +17,4 @@ Reference:
 
 For the most up-to-date information about OAT, see the [android source files](https://android.googlesource.com/platform/art/)
 
+Building from source: `ant -Dversion=1.0.5`
