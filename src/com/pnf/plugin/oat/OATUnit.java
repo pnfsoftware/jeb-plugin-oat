@@ -68,7 +68,7 @@ public class OATUnit extends AbstractInteractiveBinaryUnit {
             oat = new OATFile(data);
 
             for(DexFile dex: oat.getDexFiles()) {
-                addChild(getUnitProcessor().process(dex.getLocation(), new BytesInput(dex.getBytes()), this));
+                addChild(getUnitProcessor().process(dex.getLocation(), new BytesInput(dex.getBytes(false)), this));
             }
         }
         catch(IOException e) {

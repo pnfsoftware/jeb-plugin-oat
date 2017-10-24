@@ -18,6 +18,7 @@
 
 package com.pnf.plugin.oat.internal;
 
+import com.pnfsoftware.jeb.util.io.EndianUtil;
 import com.pnfsoftware.jeb.util.serialization.annotations.SerConstructor;
 import com.pnfsoftware.jeb.util.serialization.annotations.SerId;
 
@@ -31,7 +32,7 @@ public class DexFile extends StreamReader {
     @SerId(2)
     private int offset;
     @SerId(3)
-    private int size;
+    private int maxSize;
     @SerId(4)
     private String location;
 
@@ -39,18 +40,30 @@ public class DexFile extends StreamReader {
     DexFile() {
     }
 
-    public DexFile(byte[] data, int offset, int size, String location) {
+    public DexFile(byte[] data, int offset, int maxSize, String location) {
         this.data = data;
         this.offset = offset;
-        this.size = size;
+        this.maxSize = maxSize;
         this.location = location;
     }
 
     // Returns all of the bytes within its bounds
-    public byte[] getBytes() {
+    public byte[] getBytes(boolean provideAllBytes) {
+        int size = maxSize;
+        if(!provideAllBytes && maxSize >= 0x24) {
+            // read the DEX header's file offset (may be <0 on corruption)
+            int expectedFileSize = EndianUtil.littleEndianBytesToInt(data, offset + 0x20);
+            if(expectedFileSize > 0) {
+                size = Math.min(maxSize, expectedFileSize);
+            }
+        }
         byte[] output = new byte[size];
         System.arraycopy(data, offset, output, 0, size);
         return output;
+    }
+
+    public byte[] getBytes() {
+        return getBytes(true);
     }
 
     // Returns the string location pulled from the oat file
