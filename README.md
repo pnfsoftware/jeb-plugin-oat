@@ -1,20 +1,9 @@
 # Android OAT Plugin for JEB
 
-This plugin extracts dex files from compiled OAT files that are used by the Android Runtime.
+This plugin extracts DEX files from compiled OAT files (ELF) that are used by the Android Runtime.
 
-OAT Files pulled directly from phones will most likely be in ELF files.
-This plugin does not extract directly from ELF files, but there is an
-ELF plugin available. Otherwise, extracting the .rodata section of the
-ELF file will yield a parseable OAT file.
+Supports OAT Versions 39 - 45.
 
-Includes multidex support
+This plugin is semi-deprecated. We recommend using other tools (vdexExtractor, lief, dextra, etc.) to extract DEX files from OAT.
 
-Supports OAT Versions 39 - 45
-
-Reference:
-
-[An (older) OAT Format Link](https://www.blackhat.com/docs/asia-15/materials/asia-15-Sabanal-Hiding-Behind-ART-wp.pdf)
-
-For the most up-to-date information about OAT, see the [android source files](https://android.googlesource.com/platform/art/)
-
-Building from source: `ant -Dversion=1.0.5`
+Building from source: run the `build-xxx` script (make sure to adjust the version number beforehand).

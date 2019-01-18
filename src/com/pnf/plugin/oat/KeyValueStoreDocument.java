@@ -28,6 +28,7 @@ import com.pnfsoftware.jeb.core.output.table.ITableDocument;
 import com.pnfsoftware.jeb.core.output.table.ITableDocumentPart;
 import com.pnfsoftware.jeb.core.output.table.impl.Cell;
 import com.pnfsoftware.jeb.core.output.table.impl.TableRow;
+import com.pnfsoftware.jeb.core.properties.IPropertyManager;
 
 /**
  * View of the keyvalue store in the OAT's header.
@@ -92,5 +93,10 @@ public class KeyValueStoreDocument extends JebEventSource implements ITableDocum
 
     @Override
     public void dispose() {
+    }
+
+    @Override
+    public IPropertyManager getPropertyManager() {
+        return null;
     }
 }
