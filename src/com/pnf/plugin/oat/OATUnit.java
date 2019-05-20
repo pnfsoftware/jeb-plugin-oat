@@ -26,7 +26,7 @@ import com.pnf.plugin.oat.internal.OATFile;
 import com.pnfsoftware.jeb.core.IUnitCreator;
 import com.pnfsoftware.jeb.core.input.BytesInput;
 import com.pnfsoftware.jeb.core.input.IInput;
-import com.pnfsoftware.jeb.core.output.AbstractUnitRepresentation;
+import com.pnfsoftware.jeb.core.output.AbstractTransientUnitRepresentation;
 import com.pnfsoftware.jeb.core.output.IGenericDocument;
 import com.pnfsoftware.jeb.core.output.IUnitFormatter;
 import com.pnfsoftware.jeb.core.output.UnitFormatterUtil;
@@ -98,9 +98,9 @@ public class OATUnit extends AbstractInteractiveBinaryUnit {
     public IUnitFormatter getFormatter() {
         IUnitFormatter formatter = super.getFormatter();
         if(UnitFormatterUtil.getPresentationByIdentifier(formatter, 1) == null) {
-            formatter.addPresentation(new AbstractUnitRepresentation(1, "OAT KV-Store", true) {
+            formatter.addPresentation(new AbstractTransientUnitRepresentation(1, "OAT KV-Store", true) {
                 @Override
-                public IGenericDocument getDocument() {
+                public IGenericDocument createDocument() {
                     return new KeyValueStoreDocument(oat);
                 }
             }, false);
