@@ -18,7 +18,6 @@
 
 package com.pnf.plugin.oat;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import com.pnf.plugin.oat.internal.DexFile;
@@ -33,6 +32,7 @@ import com.pnfsoftware.jeb.core.output.UnitFormatterUtil;
 import com.pnfsoftware.jeb.core.properties.IPropertyDefinitionManager;
 import com.pnfsoftware.jeb.core.units.AbstractInteractiveBinaryUnit;
 import com.pnfsoftware.jeb.core.units.IUnitProcessor;
+import com.pnfsoftware.jeb.util.format.Strings;
 import com.pnfsoftware.jeb.util.io.IO;
 import com.pnfsoftware.jeb.util.logging.GlobalLog;
 import com.pnfsoftware.jeb.util.logging.ILogger;
@@ -68,10 +68,16 @@ public class OATUnit extends AbstractInteractiveBinaryUnit {
             oat = new OATFile(data);
 
             for(DexFile dex: oat.getDexFiles()) {
-                addChild(getUnitProcessor().process(dex.getLocation(), new BytesInput(dex.getBytes(false)), this));
+                String loc = dex.getLocation();
+                if(Strings.isBlank(loc)) {
+                    //loc = "unnamed";
+                    continue;
+                }
+
+                addChild(getUnitProcessor().process(loc, new BytesInput(dex.getBytes(false)), this));
             }
         }
-        catch(IOException e) {
+        catch(Exception e) {
             logger.catching(e);
             return false;
         }
