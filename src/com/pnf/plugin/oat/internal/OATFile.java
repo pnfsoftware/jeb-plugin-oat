@@ -19,6 +19,7 @@
 package com.pnf.plugin.oat.internal;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,8 @@ import com.pnfsoftware.jeb.util.serialization.annotations.SerId;
  * Description of an OAT file.
  * <p>
  * Description of the OAT header: refer to [art]/runtime/oat.h
+ * </p>
+ * Valid until version 214 (2021/11/22).
  * 
  */
 @SuppressWarnings("unused")
@@ -82,6 +85,12 @@ public class OATFile extends StreamReader {
     private byte[] keyValueStore;
     @SerId(23)
     private List<DexFile> dexFiles = new ArrayList<>();
+    @SerId(24)
+    private int oatDexFilesOffset;
+    @SerId(25)
+    private int jniDlsymLookupCriticalTrampolineOffset;
+    @SerId(26)
+    private int nterpTrampolineOffset;
 
     @SerConstructor
     protected OATFile() {
@@ -110,72 +119,95 @@ public class OATFile extends StreamReader {
             throw new IllegalArgumentException("Unsupported OAT version " + version);
         }
 
-        if(version > 88) {
-            logger.warn("OAT version %d partially unsupported, unexpected behavior may happen", version);
+        if(version > 214) {
+            logger.warn("OAT version %d not officially unsupported, unexpected behavior may happen", version);
         }
 
-        // OAT HEADER FORMAT -- version 39, exceptions start version 45+
-        // Bytes: name
-        // 0-3 : magic num (oat\n)
-        // 4-7 : OAT version
-        // 8-11 : checksum of header
-        // 12-15: ISA
-        // 16-19: ISA features bitmask
-        // 20-23: Dex file count
-        // 24-27: offset of executable code section
-        // 28-31: interpreter to interpreter bridge offset
-        // 32-35: interpreter to compile code bridge offset
-        // 36-39: jni dlsym lookup offset
-        // 40-43: portable imt conflict trampoline offset   // REMOVED in version 45+
-        // 44-47: portable resolution trampoline offset     // REMOVED in version 45+
-        // 48-51: portable to interpreter bridge offset     // REMOVED in version 45+
-        // 52-55: quick generic jni trampoline offset
-        // 56-59: quick imt conflict trampoline offset
-        // 60-63: quick resolution trampoline offset
-        // 64-67: quick to interpreter bridge offset
-        // 68-71: image patch delta
-        // 72-75: image file location oat checksum
-        // 76-79: image file location oat data begin
-        // 80-83: key value store length
-        // 80-~~: key value store - hold some info about compilation
-        // Start dex headers
-        // 0-3 : dex file location size
-        // 4-~~ : dex file location path string
-        // 0-3 : dex file location checksum
-        // 4-7 : dex file pointer from start of oatdata
+        // OAT HEADER FORMAT: base is version 39, exceptions start in version 45+
+        //
+        // (all entries are 32-bit words)
+        //        magic number ('oat\n')
+        //        OAT version ('NNN\0')
+        //        checksum of header
+        //        ISA
+        //        ISA features bitmask
+        //        Dex file count
+        //        OAT Dex Files Offset                          // ADDED in v127+
+        //        offset of executable code section
+        //        interpreter to interpreter bridge offset      // REMOVED in v170+
+        //        interpreter to compile code bridge offset     // REMOVED in v170+
+        //        jni dlsym lookup (trampoline) offset
+        //        jni dlsym lookup critical trampoline offset   // ADDED in v180+
+        //        portable imt conflict trampoline offset       // REMOVED in v45+
+        //        portable resolution trampoline offset         // REMOVED in v45+
+        //        portable to interpreter bridge offset         // REMOVED in v45+
+        //        quick generic jni trampoline offset
+        //        quick imt conflict trampoline offset
+        //        quick resolution trampoline offset
+        //        quick to interpreter bridge offset
+        //        nterp trampoline offset                       // ADDED in v190+
+        //        image patch delta                             // REMOVED in v162+
+        //        image file location oat checksum              // BECOMES "boot image checksum" in v164+ / REMOVED in v166+
+        //        image file location oat data begin            // REMOVED in v162+
+        //        key value store length
+        // *      key value store - hold some info about compilation
+        // (start of dex headers)
+        //        dex file location size
+        // *      dex file location path string
+        //        dex file location checksum
+        //        dex file pointer from start of oatdata
 
         // ISA - see OAT.java
         instructionSet = readInt(stream);
         instructionSetFeatures = readInt(stream);
         dexFileCount = readInt(stream);
-
-        // Get all the less useful information
+        if(version >= 127) {
+            oatDexFilesOffset = readInt(stream);
+        }
         executableOffset = readInt(stream);
-        interpreterToInterpreterBridgeOffset = readInt(stream);
-        interpreterToCompiledCodeBridgeOffset = readInt(stream);
+        if(version < 170) {
+            interpreterToInterpreterBridgeOffset = readInt(stream);
+            interpreterToCompiledCodeBridgeOffset = readInt(stream);
+        }
         jniDlsymLookupOffset = readInt(stream);
-
-        if(version <= 45) {
+        if(version >= 180) {
+            jniDlsymLookupCriticalTrampolineOffset = readInt(stream);
+        }
+        if(version < 45) {
             portableImtConflictTrampolineOffset = readInt(stream);
             portableResolutionTrampolineOffset = readInt(stream);
             portableToInterpreterBridgeOffset = readInt(stream);
         }
-
         quickGenericJniTrampolineOffset = readInt(stream);
         quickImtConflictTrampolineOffset = readInt(stream);
         quickResolutionTrampolineOffset = readInt(stream);
         quickToInterpreterBridgeOffset = readInt(stream);
+        if(version >= 190) {
+            nterpTrampolineOffset = readInt(stream);
+        }
+        if(version < 162) {
+            imagePatchDelta = readInt(stream);
+        }
+        if(version < 166) {
+            imageFileLocationOatChecksum = readInt(stream);
+        }
+        if(version < 162) {
+            imageFileLocationOatDataBegin = readInt(stream);
+        }
 
-        imagePatchDelta = readInt(stream);
-        imageFileLocationOatChecksum = readInt(stream);
-        imageFileLocationOatDataBegin = readInt(stream);
-
-        // KeyValueStoreSize needs to be read to give some compilation
-        // information
         keyValueStoreSize = readInt(stream);
+        if(keyValueStoreSize >= 200*1024*1024) {
+            // safety, most likely would be the result of an unsupported oat version 
+            throw new IllegalArgumentException("KeyValue store is too large, parsing failed!");
+        }
         keyValueStore = new byte[keyValueStoreSize];
-        for(int index = 0; index < keyValueStoreSize; index++) {
-            stream.read(keyValueStore, index, 1);
+        try {
+            if(stream.read(keyValueStore) != keyValueStoreSize) {
+                logger.warn("The KeyValue store was not fully read, the input file may be truncated");
+            }
+        }
+        catch(IOException ex) {
+            throw new RuntimeException(ex);
         }
 
         // After the key value store, there is a list of dex file headers
@@ -223,7 +255,7 @@ public class OATFile extends StreamReader {
 
                 if(v >= 0 && (v + 100) <= data.length) {
                     int val = littleEndianBytesToInt(data, v);
-                    if(val == 0x0A786564) {
+                    if(val == 0x0A786564) {  // 'dex\n'
                         String name = String.format("Unknown DEX #%d", dexFiles.size() + 1);
                         dexFiles.add(new DexFile(data, v, data.length - v, name));
                         if(dexFiles.size() >= dexFileCount) {
