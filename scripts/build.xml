@@ -2,7 +2,6 @@
 <!--===============================================================================================
 Ant build file to build and package the JEB plugin.
 Requirements:
-- JEB 3.0.7 or above
 - Set up the JEB_HOME environment variable to point to your JEB installation folder.
 - Customize the outfile, entryclass, extcp_build, and extcp_manifest properties.
 ================================================================================================-->
@@ -33,8 +32,8 @@ Requirements:
     </fail>
 
     <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.8"/>
-    <property name="source" value="1.8"/>
+    <property name="target" value="11"/>
+    <property name="source" value="11"/>
 
     <!-- Mandatory properties -->
     <property name="src" value="src"/>
@@ -46,7 +45,6 @@ Requirements:
     <property name="extcp_manifest" value=""/>
 
     <target name="build" depends="clean,compile,package"/>
-    <target name="audit" depends="clean,compile-audit"/>
 
     <target name="clean">
         <delete dir="bin"/>
@@ -57,20 +55,6 @@ Requirements:
         <delete dir="bin"/>
         <mkdir dir="bin"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}" encoding="UTF-8">
-            <src path="${src}"/>
-            <classpath>
-                <pathelement location="${jebjar}"/>
-                <pathelement path="${extcp_build}"/>
-            </classpath>
-        </javac>
-    </target>
-
-    <target name="compile-audit">
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}" encoding="UTF-8"
-               compiler="com.google.errorprone.ErrorProneAntCompilerAdapter">
-            <compilerclasspath>
-                <pathelement location="../jeb2-common/errorprone.jar"/>
-            </compilerclasspath>
             <src path="${src}"/>
             <classpath>
                 <pathelement location="${jebjar}"/>
